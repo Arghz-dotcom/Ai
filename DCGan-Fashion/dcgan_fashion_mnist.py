@@ -13,6 +13,7 @@ import numpy as np
 import argparse
 import cv2
 import os
+import time
 
 # construct the argument parse and parse the arguments
 ap = argparse.ArgumentParser()
@@ -70,6 +71,7 @@ gan.compile(loss="binary_crossentropy", optimizer=discOpt)
 print("[INFO] starting training...")
 benchmarkNoise = np.random.uniform(-1, 1, size=(256, 100))
 
+t0 = time.time()
 # loop over the epochs
 for epoch in range(0, NUM_EPOCHS):
 	# show epoch information and compute the number of batches per
@@ -149,3 +151,5 @@ for epoch in range(0, NUM_EPOCHS):
 			# write the visualization to disk
 			p = os.path.sep.join(p)
 			cv2.imwrite(p, vis)
+
+print("Time per epoch: " + str((time.time() - t0)/NUM_EPOCHS) + "s")
