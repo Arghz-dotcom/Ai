@@ -64,7 +64,7 @@ gan = Model(ganInput, ganOutput)
 
 # compile the GAN
 ganOpt = Adam(lr=INIT_LR, beta_1=0.5, decay=INIT_LR / NUM_EPOCHS)
-gan.compile(loss="binary_crossentropy", optimizer=discOpt)
+gan.compile(loss="binary_crossentropy", optimizer=ganOpt)
 
 # randomly generate some benchmark noise so we can consistently
 # visualize how the generative modeling is learning
