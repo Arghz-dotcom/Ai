@@ -64,8 +64,8 @@ for csvPath in paths.list_files(config.ANNOTS_PATH, validExts=(".csv")):
 		# image paths
 		data.append(image)
 		labels.append(label)
-		bboxes.append((startX, startY, endX, endY))
-		imagePaths.append(imagePath)
+        bboxes.append((startX, startY, endX, endY))
+        imagePaths.append(imagePath)
 
 # convert the data, class labels, bounding boxes, and image paths to
 # NumPy arrays, scaling the input pixel intensities from the range
@@ -82,7 +82,7 @@ labels = lb.fit_transform(labels)
 # only there are only two labels in the dataset, then we need to use
 # Keras/TensorFlow's utility function as well
 if len(lb.classes_) == 2:
-	labels = to_categorical(labels)
+    labels = to_categorical(labels)
 
 # partition the data into training and testing splits using 80% of
 # the data for training and the remaining 20% for testing
