@@ -37,8 +37,8 @@ for csvPath in paths.list_files(config.ANNOTS_PATH, validExts=(".csv")):
 
 	# loop over the rows
 	for row in rows:
-		# break the row into the filename, bounding box coordinates,
-		# and class label
+	    # break the row into the filename, bounding box coordinates,
+	    # and class label
 		row = row.split(",")
 		(filename, startX, startY, endX, endY, label) = row
 
@@ -64,8 +64,8 @@ for csvPath in paths.list_files(config.ANNOTS_PATH, validExts=(".csv")):
 		# image paths
 		data.append(image)
 		labels.append(label)
-        bboxes.append((startX, startY, endX, endY))
-        imagePaths.append(imagePath)
+		bboxes.append((startX, startY, endX, endY))
+		imagePaths.append(imagePath)
 
 # convert the data, class labels, bounding boxes, and image paths to
 # NumPy arrays, scaling the input pixel intensities from the range
