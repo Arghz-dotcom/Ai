@@ -1,26 +1,24 @@
 # USAGE
 # python train.py
 
-# import the necessary packages
-from pyimagesearch import config
-from tensorflow.keras.applications import VGG16
-from tensorflow.keras.layers import Flatten
-from tensorflow.keras.layers import Dropout
-from tensorflow.keras.layers import Dense
-from tensorflow.keras.layers import Input
-from tensorflow.keras.models import Model
-from tensorflow.keras.optimizers import Adam
-from tensorflow.keras.preprocessing.image import img_to_array
-from tensorflow.keras.preprocessing.image import load_img
-from tensorflow.keras.utils import to_categorical
-from sklearn.preprocessing import LabelBinarizer
-from sklearn.model_selection import train_test_split
-from imutils import paths
+import os
+import pickle
+
+import cv2
 import matplotlib.pyplot as plt
 import numpy as np
-import pickle
-import cv2
-import os
+from imutils import paths
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import LabelBinarizer
+from tensorflow.keras.applications import VGG16
+from tensorflow.keras.layers import Dense, Dropout, Flatten, Input
+from tensorflow.keras.models import Model
+from tensorflow.keras.optimizers import Adam
+from tensorflow.keras.preprocessing.image import img_to_array, load_img
+from tensorflow.keras.utils import to_categorical
+
+# import the necessary packages
+from pyimagesearch import config
 
 # initialize the list of data (images), class labels, target bounding
 # box coordinates, and image paths
@@ -32,40 +30,39 @@ imagePaths = []
 
 # loop over all CSV files in the annotations directory
 for csvPath in paths.list_files(config.ANNOTS_PATH, validExts=(".csv")):
-	# load the contents of the current CSV annotations file
-	rows = open(csvPath).read().strip().split("\n")
+    # load the contents of the current CSV annotations file
+    rows = open(csvPath).read().strip().split("\n")
 
-	# loop over the rows
-	for row in rows:
-	    # break the row into the filename, bounding box coordinates,
-	    # and class label
-		row = row.split(",")
-		(filename, startX, startY, endX, endY, label) = row
+    # loop over the rows
+    for row in rows:
+        # break the row into the filename, bounding box coordinates,
+        # and class label
+        row = row.split(",")
+        (filename, startX, startY, endX, endY, label) = row
 
-		# derive the path to the input image, load the image (in
-		# OpenCV format), and grab its dimensions
-		imagePath = os.path.sep.join([config.IMAGES_PATH, label,
-			filename])
-		image = cv2.imread(imagePath)
-		(h, w) = image.shape[:2]
+        # derive the path to the input image, load the image (in
+        # OpenCV format), and grab its dimensions
+        imagePath = os.path.sep.join([config.IMAGES_PATH, label, filename])
+        image = cv2.imread(imagePath)
+        (h, w) = image.shape[:2]
 
-		# scale the bounding box coordinates relative to the spatial
-		# dimensions of the input image
-		startX = float(startX) / w
-		startY = float(startY) / h
-		endX = float(endX) / w
-		endY = float(endY) / h
+        # scale the bounding box coordinates relative to the spatial
+        # dimensions of the input image
+        startX = float(startX) / w
+        startY = float(startY) / h
+        endX = float(endX) / w
+        endY = float(endY) / h
 
-		# load the image and preprocess it
-		image = load_img(imagePath, target_size=(224, 224))
-		image = img_to_array(image)
+        # load the image and preprocess it
+        image = load_img(imagePath, target_size=(224, 224))
+        image = img_to_array(image)
 
-		# update our list of data, class labels, bounding boxes, and
-		# image paths
-		data.append(image)
-		labels.append(label)
-		bboxes.append((startX, startY, endX, endY))
-		imagePaths.append(imagePath)
+        # update our list of data, class labels, bounding boxes, and
+        # image paths
+        data.append(image)
+        labels.append(label)
+        bboxes.append((startX, startY, endX, endY))
+        imagePaths.append(imagePath)
 
 # convert the data, class labels, bounding boxes, and image paths to
 # NumPy arrays, scaling the input pixel intensities from the range
@@ -86,8 +83,9 @@ if len(lb.classes_) == 2:
 
 # partition the data into training and testing splits using 80% of
 # the data for training and the remaining 20% for testing
-split = train_test_split(data, labels, bboxes, imagePaths,
-	test_size=0.20, random_state=42)
+split = train_test_split(
+    data, labels, bboxes, imagePaths, test_size=0.20, random_state=42
+)
 
 # unpack the data split
 (trainImages, testImages) = split[:2]
@@ -103,8 +101,9 @@ f.write("\n".join(testPaths))
 f.close()
 
 # load the VGG16 network, ensuring the head FC layers are left off
-vgg = VGG16(weights="imagenet", include_top=False,
-	input_tensor=Input(shape=(224, 224, 3)))
+vgg = VGG16(
+    weights="imagenet", include_top=False, input_tensor=Input(shape=(224, 224, 3))
+)
 
 # freeze all VGG layers so they will *not* be updated during the
 # training process
@@ -119,8 +118,7 @@ flatten = Flatten()(flatten)
 bboxHead = Dense(128, activation="relu")(flatten)
 bboxHead = Dense(64, activation="relu")(bboxHead)
 bboxHead = Dense(32, activation="relu")(bboxHead)
-bboxHead = Dense(4, activation="sigmoid",
-	name="bounding_box")(bboxHead)
+bboxHead = Dense(4, activation="sigmoid", name="bounding_box")(bboxHead)
 
 # construct a second fully-connected layer head, this one to predict
 # the class label
@@ -128,58 +126,52 @@ softmaxHead = Dense(512, activation="relu")(flatten)
 softmaxHead = Dropout(0.5)(softmaxHead)
 softmaxHead = Dense(512, activation="relu")(softmaxHead)
 softmaxHead = Dropout(0.5)(softmaxHead)
-softmaxHead = Dense(len(lb.classes_), activation="softmax",
-	name="class_label")(softmaxHead)
+softmaxHead = Dense(len(lb.classes_), activation="softmax", name="class_label")(
+    softmaxHead
+)
 
 # put together our model which accept an input image and then output
 # bounding box coordinates and a class label
-model = Model(
-	inputs=vgg.input,
-	outputs=(bboxHead, softmaxHead))
+model = Model(inputs=vgg.input, outputs=(bboxHead, softmaxHead))
 
 # define a dictionary to set the loss methods -- categorical
 # cross-entropy for the class label head and mean absolute error
 # for the bounding box head
 losses = {
-	"class_label": "categorical_crossentropy",
-	"bounding_box": "mean_squared_error",
+    "class_label": "categorical_crossentropy",
+    "bounding_box": "mean_squared_error",
 }
 
 # define a dictionary that specifies the weights per loss (both the
 # class label and bounding box outputs will receive equal weight)
-lossWeights = {
-	"class_label": 1.0,
-	"bounding_box": 1.0
-}
+lossWeights = {"class_label": 1.0, "bounding_box": 1.0}
 
 # initialize the optimizer, compile the model, and show the model
 # summary
 opt = Adam(lr=config.INIT_LR)
-model.compile(loss=losses, optimizer=opt, metrics=["accuracy"], loss_weights=lossWeights)
+model.compile(
+    loss=losses, optimizer=opt, metrics=["accuracy"], loss_weights=lossWeights
+)
 print(model.summary())
 
 # construct a dictionary for our target training outputs
-trainTargets = {
-	"class_label": trainLabels,
-	"bounding_box": trainBBoxes
-}
+trainTargets = {"class_label": trainLabels, "bounding_box": trainBBoxes}
 
 # construct a second dictionary, this one for our target testing
 # outputs
-testTargets = {
-	"class_label": testLabels,
-	"bounding_box": testBBoxes
-}
+testTargets = {"class_label": testLabels, "bounding_box": testBBoxes}
 
 # train the network for bounding box regression and class label
 # prediction
 print("[INFO] training model...")
 H = model.fit(
-	trainImages, trainTargets,
-	validation_data=(testImages, testTargets),
-	batch_size=config.BATCH_SIZE,
-	epochs=config.NUM_EPOCHS,
-	verbose=1)
+    trainImages,
+    trainTargets,
+    validation_data=(testImages, testTargets),
+    batch_size=config.BATCH_SIZE,
+    epochs=config.NUM_EPOCHS,
+    verbose=1,
+)
 
 # serialize the model to disk
 print("[INFO] saving object detector model...")
@@ -199,14 +191,14 @@ plt.style.use("ggplot")
 
 # loop over the loss names
 for (i, l) in enumerate(lossNames):
-	# plot the loss for both the training and validation data
-	title = "Loss for {}".format(l) if l != "loss" else "Total loss"
-	ax[i].set_title(title)
-	ax[i].set_xlabel("Epoch #")
-	ax[i].set_ylabel("Loss")
-	ax[i].plot(N, H.history[l], label=l)
-	ax[i].plot(N, H.history["val_" + l], label="val_" + l)
-	ax[i].legend()
+    # plot the loss for both the training and validation data
+    title = "Loss for {}".format(l) if l != "loss" else "Total loss"
+    ax[i].set_title(title)
+    ax[i].set_xlabel("Epoch #")
+    ax[i].set_ylabel("Loss")
+    ax[i].plot(N, H.history[l], label=l)
+    ax[i].plot(N, H.history["val_" + l], label="val_" + l)
+    ax[i].legend()
 
 # save the losses figure and create a new figure for the accuracies
 plt.tight_layout()
@@ -217,10 +209,8 @@ plt.close()
 # create a new figure for the accuracies
 plt.style.use("ggplot")
 plt.figure()
-plt.plot(N, H.history["class_label_accuracy"],
-	label="class_label_train_acc")
-plt.plot(N, H.history["val_class_label_accuracy"],
-	label="val_class_label_acc")
+plt.plot(N, H.history["class_label_accuracy"], label="class_label_train_acc")
+plt.plot(N, H.history["val_class_label_accuracy"], label="val_class_label_acc")
 plt.title("Class Label Accuracy")
 plt.xlabel("Epoch #")
 plt.ylabel("Accuracy")
