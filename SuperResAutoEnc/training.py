@@ -14,54 +14,11 @@ from tensorflow.keras import regularizers
 import tensorflow as tf
 print(tf.__version__)
 
-input_img = Input(shape=(256,256,3))
-l1 = Conv2D(64, (3,3), padding='same', activation='relu',
-           activity_regularizer=regularizers.l1(10e-10))(input_img)
-l2 = Conv2D(64, (3,3), padding='same', activation='relu',
-           activity_regularizer=regularizers.l1(10e-10))(l1)
-l3 = MaxPooling2D(padding='same')(l2)
-l4 = Conv2D(128, (3,3), padding='same', activation='relu',
-           activity_regularizer=regularizers.l1(10e-10))(l3)
-l5 = Conv2D(128, (3,3), padding='same', activation='relu',
-           activity_regularizer=regularizers.l1(10e-10))(l4)
-l6 = MaxPooling2D(padding='same')(l5)
-l7 = Conv2D(256, (3,3), padding='same', activation='relu',
-           activity_regularizer=regularizers.l1(10e-10))(l6)
-
-encoder = Model(input_img, l7)
-
-input_img = Input(shape=(256,256,3))
-l1 = Conv2D(64, (3,3), padding='same', activation='relu',
-           activity_regularizer=regularizers.l1(10e-10))(input_img)
-l2 = Conv2D(64, (3,3), padding='same', activation='relu',
-           activity_regularizer=regularizers.l1(10e-10))(l1)
-l3 = MaxPooling2D(padding='same')(l2)
-l4 = Conv2D(128, (3,3), padding='same', activation='relu',
-           activity_regularizer=regularizers.l1(10e-10))(l3)
-l5 = Conv2D(128, (3,3), padding='same', activation='relu',
-           activity_regularizer=regularizers.l1(10e-10))(l4)
-l6 = MaxPooling2D(padding='same')(l5)
-l7 = Conv2D(256, (3,3), padding='same', activation='relu',
-           activity_regularizer=regularizers.l1(10e-10))(l6)
-l8 = UpSampling2D()(l7)
-l9 = Conv2D(128, (3,3), padding='same', activation='relu',
-           activity_regularizer=regularizers.l1(10e-10))(l8)
-l10 = Conv2D(128, (3,3), padding='same', activation='relu',
-           activity_regularizer=regularizers.l1(10e-10))(l9)
-l11 = add([l5, l10])
-l12 = UpSampling2D()(l11)
-l13 = Conv2D(64, (3,3), padding='same', activation='relu',
-           activity_regularizer=regularizers.l1(10e-10))(l12)
-l14 = Conv2D(64, (3,3), padding='same', activation='relu',
-           activity_regularizer=regularizers.l1(10e-10))(l13)
-l15 = add([l14, l2])
-
-decoded = Conv2D(3, (3,3), padding='same', activation='relu',
-           activity_regularizer=regularizers.l1(10e-10))(l15)
-
-autoencoder = Model(input_img, decoded)
+import models
 
 
+encoder = models.encoder
+autoencoder = models.autoencoder
 autoencoder.compile(optimizer='adadelta', loss='mean_squared_error')
 
 def train_batches(just_load_dataset=False):
@@ -121,6 +78,8 @@ def train_batches(just_load_dataset=False):
 x_train_n, x_train_down = train_batches(just_load_dataset=True)
 
 autoencoder.load_weights('data/sr.img_net.mse.final_model5.no_patch.weights.best.hdf5')
+encoder.load_weights('data/encoder_weights.hdf5')
+
 
 encoded_imgs = encoder.predict(x_train_down)
 print(encoded_imgs.shape)

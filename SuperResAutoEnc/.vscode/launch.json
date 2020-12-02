@@ -10,6 +10,13 @@
             "request": "launch",
             "program": "training.py",
             "console": "integratedTerminal"
+        },
+        {
+            "name": "Predict",
+            "type": "python",
+            "request": "launch",
+            "program": "predict.py",
+            "console": "integratedTerminal"
         }
     ]
 }
