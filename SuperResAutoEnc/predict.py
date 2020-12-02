@@ -32,8 +32,6 @@ print(encoded_imgs.shape)
 
 sr1 = np.clip(autoencoder.predict(image_down2), 0.0, 1.0)
 
-#encoded_imgs = np.squeeze(encoded_imgs, axis=0)
-#sr1 = np.squeeze(sr1, axis=0)
 image_down2 = np.squeeze(image_down2, axis=0)
 
 plt.figure(figsize=(128,128))

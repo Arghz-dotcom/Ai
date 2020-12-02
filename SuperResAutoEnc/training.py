@@ -31,14 +31,14 @@ def train_batches(just_load_dataset=False):
     
     ep = 4 
 
-    images = []
+    #images = []
     x_train_n = []
     x_train_down = []
     
     x_train_n2 = [] 
     x_train_down2 = []
     
-    for root, dirnames, filenames in os.walk("../Datasets/cars_train"):
+    for root, _, filenames in os.walk("../Datasets/cars_train"):
         for filename in filenames:
             if re.search("\.(jpg|jpeg|JPEG|png|bmp|tiff)$", filename):
                 if batch_nb == max_batches: 
@@ -77,30 +77,4 @@ def train_batches(just_load_dataset=False):
 
 x_train_n, x_train_down = train_batches(just_load_dataset=True)
 
-autoencoder.load_weights('data/sr.img_net.mse.final_model5.no_patch.weights.best.hdf5')
-encoder.load_weights('data/encoder_weights.hdf5')
 
-
-encoded_imgs = encoder.predict(x_train_down)
-print(encoded_imgs.shape)
-
-sr1 = np.clip(autoencoder.predict(x_train_down), 0.0, 1.0)
-image_index = np.random.randint(0, 256)
-
-plt.figure(figsize=(128,128))
-i = 1
-ax = plt.subplot(10,10,i)
-plt.imshow(x_train_down[image_index])
-i += 1
-ax = plt.subplot(10,10,i)
-plt.imshow(x_train_down[image_index], interpolation='bicubic')
-i += 1
-ax = plt.subplot(10,10,i)
-plt.imshow(encoded_imgs[image_index].reshape((64*64, 256)))
-i += 1
-ax = plt.subplot(10,10,i)
-plt.imshow(sr1[image_index])
-i += 1
-ax = plt.subplot(10,10,i)
-plt.imshow(x_train_n[image_index])
-plt.show()
