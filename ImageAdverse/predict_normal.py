@@ -10,8 +10,9 @@ import argparse
 import imutils
 import cv2
 
+# fix download
+# +  https://slproweb.com/products/Win32OpenSSL.html
 import ssl
-
 ssl._create_default_https_context = ssl._create_unverified_context
 
 def preprocess_image(image):

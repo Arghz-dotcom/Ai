@@ -11,6 +11,15 @@
             "program": "predict_normal.py",
             "console": "integratedTerminal",
             "args": ["--image", "pig.jpg"]
+        },
+        {
+            "name": "Adversary",
+            "type": "python",
+            "request": "launch",
+            "program": "generate_basic_adversary.py",
+            "console": "integratedTerminal",
+            "args": ["--input", "pig.jpg", "--output", "adversarial.png", "--class-idx", "341"]
         }
+         
     ]
 }

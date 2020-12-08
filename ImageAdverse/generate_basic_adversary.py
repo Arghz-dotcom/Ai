@@ -5,8 +5,7 @@
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.applications import ResNet50
 from tensorflow.keras.losses import SparseCategoricalCrossentropy
-from tensorflow.keras.applications.resnet50 import decode_predictions
-from tensorflow.keras.applications.resnet50 import preprocess_input
+from tensorflow.keras.applications.resnet50 import decode_predictions, preprocess_input
 import tensorflow as tf
 import numpy as np
 import argparse
