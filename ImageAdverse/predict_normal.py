@@ -4,12 +4,15 @@
 # import necessary packages
 from pyimagesearch.utils import get_class_idx
 from tensorflow.keras.applications import ResNet50
-from tensorflow.keras.applications.resnet50 import decode_predictions
-from tensorflow.keras.applications.resnet50 import preprocess_input
+from tensorflow.keras.applications.resnet50 import decode_predictions, preprocess_input
 import numpy as np
 import argparse
 import imutils
 import cv2
+
+import ssl
+
+ssl._create_default_https_context = ssl._create_unverified_context
 
 def preprocess_image(image):
 	# swap color channels, preprocess the image, and add in a batch
