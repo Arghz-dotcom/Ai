@@ -1,0 +1,4 @@
+youtube tutorial:
+https://www.youtube.com/watch?v=dWmJ5CXSKdw&t=1904s
+github tutorial:
+https://github.com/nicknochnack/MarioRL/blob/main/Mario%20Tutorial.ipynb
