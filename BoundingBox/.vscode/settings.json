@@ -1,4 +1,0 @@
-{
-    "python.pythonPath": "D:\\Anaconda\\envs\\KerasTf22\\python.exe",
-    "python.linting.pylintArgs":["--extension-pkg-whitelist=cv2"]
-}
