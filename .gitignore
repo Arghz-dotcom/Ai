@@ -1,2 +1,4 @@
 BoundingBox/pyimagesearch/__pycache__/
 SuperResAutoEnc/__pycache__/
+model_*.pt
+optimizer_*.pt
